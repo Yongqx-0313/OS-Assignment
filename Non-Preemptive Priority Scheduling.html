@@ -1,0 +1,493 @@
+<!-- HTML5 doctype declaration -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Metadata for character set and viewport settings -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Page title -->
+    <title>Non-Preemptive Priority Scheduling</title>
+    <!-- Internal CSS styles -->
+    <style>
+        /* Overall styling for the body */
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        /* Styling for the main heading */
+        h1 {
+            font-family: Lucida, Monospace;
+            text-align: center;
+        }
+
+        /* Styling for buttons */
+        button {
+            background-color: #5fd4d8;
+            border: none;
+            color: #ffffff;
+            padding: 5px 5px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        /* Styling for tables */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            background-color: #ffdb78;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        /* Styling for preformatted text */
+        pre {
+            white-space: pre-wrap;
+        }
+        /* Styling for Gantt chart */
+        .gantt-chart {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            background-color: orange;
+        }
+        /* Styling for process columns in Gantt chart */
+        .process-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* Styling for process bars in Gantt chart */
+        .process-bar {
+            border: 1px solid black;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 30px;
+            margin-bottom: 5px;
+        }
+        /* Styling for completion time label in Gantt chart */
+        .completion-time {
+            position: absolute;
+            bottom: -15px;
+            right: -5px; /* Adjusted position */
+        }
+        /* Styling for modal window */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        /* Styling for modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+        /* Styling for close button in modal */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Styling for container1 */
+        .container1 {
+            text-align: center;
+            background-color: rgb(83, 119, 225);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        /* Styling for container2 */
+        .container2 {
+            text-align: center;
+            background-color: rgb(240, 214, 191);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            overflow: auto;
+        }
+        /* Styling for input fields and select box */
+        input[type=number], select {
+            margin: 2px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: Lucida, Monospace;
+            font-size: 2em;
+        }
+        @media screen and (min-width:320px) {
+
+            input[type=number],
+            select {
+                width: 40%;
+            }
+            button{
+                margin-bottom: 10px;
+            }
+        }
+
+        @media screen and (min-width:768px) {
+
+            input[type=number],
+            select {
+                width: 10%;
+            }
+            button{
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main form for process input -->
+    <div class="container1">
+        <form id="processForm">
+            <h1>Non Preemptive Priority CPU Scheduling</h1>
+            <!-- Input fields for burst time, arrival time, and priority -->
+            <label for="processNumber">Process:</label><br>
+            <input type="number" id="processNumber" name="processNumber"><br>
+            <label for="burstTime">Burst Time:</label><br>
+            <input type="number" id="burstTime" name="burstTime" min="1" required><br>
+            <label for="arrivalTime">Arrival Time:</label><br>
+            <input type="number" id="arrivalTime" name="arrivalTime" min="0" required><br>
+            <label for="priority">Priority:</label><br>
+            <input type="number" id="priority" name="priority" min="0" required><br><br>
+            <!-- Buttons for adding processes, deleting processes, clearing all, scheduling, and viewing input details -->
+            <button type="button" value="Add Process" onclick="addProcess()">Add Processes</button>
+            <button type="button" onclick="deleteProcesses()">Delete Processes</button>
+            <button type="button" onclick="clearAll()">Clear</button>
+            <button onclick="schedule()">Schedule</button>
+            <button onclick="openViewWindow()">View Input Details</button>
+        </form>
+        <br>
+        <a href="Main.html"><button>Home</button></a>
+    </div>
+    <br>
+    <!-- Output container for Gantt chart, process details table, and average turnaround/waiting time -->
+    <div id="output" class="container2">
+        <!-- Gantt chart, process details table, and average turnaround/waiting time outputs will be displayed here -->
+    </div>
+
+    <!-- Modal for viewing input details -->
+    <div id="viewDetailsModal" class="modal">
+        <div class="modal-content">
+            <!-- Close button for the modal -->
+            <span class="close" onclick="closeViewWindow()">&times;</span>
+            <!-- Heading for input details modal -->
+            <h2>Input Details</h2>
+            <!-- Container for displaying input details -->
+            <div id="inputDetails"></div>
+        </div>
+    </div>
+
+<script>
+// Array to store processes with burst time, arrival time, and priority
+let processes = [];
+
+// Function to add a process to the processes array
+function addProcess() {
+    // Retrieving input values from the form
+    const processNumberInput = document.getElementById('processNumber');
+    const burstTimeInput = document.getElementById('burstTime');
+    const arrivalTimeInput = document.getElementById('arrivalTime');
+    const priorityInput = document.getElementById('priority');
+
+    // Parsing input values to integers
+    const processNumber = "P" + parseInt(processNumberInput.value);
+    const burstTime = parseInt(burstTimeInput.value);
+    const arrivalTime = parseInt(arrivalTimeInput.value);
+    const priority = parseInt(priorityInput.value);
+
+    // Validating input values
+    if (isNaN(burstTime) || isNaN(arrivalTime) || isNaN(priority) || burstTime <= 0 || arrivalTime < 0 || priority < 0 ||processNumberInput.value === '' ||parseInt(processNumberInput.value) < 0) {
+        alert("Invalid input! Burst Time must be greater than 0, Process, Arrival Time and Priority must not be negative. \nBesides, Process, Number of Burst Time, Arrival Time and Priority must match, cannot have missing input");
+        return;
+    }
+
+    // Check if the process number already exists
+    if (processes.some(process => process.processNumber === processNumber)) {
+        alert("Process with the same Process Number already exists. Please choose a different Process Number.");
+        return;
+    }
+
+    // Adding the process to the processes array
+    processes.push({
+        processNumber: processNumber,
+        burstTime: burstTime,
+        arrivalTime: arrivalTime,
+        priority: priority
+    });
+
+    // Sort the processes array based on the process number
+    processes.sort((a, b) => {
+        return a.processNumber.localeCompare(b.processNumber);
+    });
+
+    // Clearing the form and updating the displayed processes
+    clearForm();
+    displayProcesses();
+}
+
+// Function to delete the last added process
+function deleteProcesses() {
+    processes.pop(); // Remove the last process
+    displayProcesses(); // Update the displayed processes
+    schedule(); // Update the Gantt chart
+}
+
+// Function to clear all processes and reset the form
+function clearAll() {
+    processes = []; // Clear all processes
+    clearForm(); // Clear the input form
+    displayProcesses(); // Update the displayed processes
+    document.getElementById('output').innerHTML = ''; // Clear the output
+}
+
+// Function to clear the input form
+function clearForm() {
+    document.getElementById('burstTime').value = '';
+    document.getElementById('arrivalTime').value = '';
+    document.getElementById('priority').value = '';
+    document.getElementById('processNumber').value = '';
+}
+
+// Function to display the details of processes on the page
+function displayProcesses() {
+    // Sort the processes array based on the process number
+    processes.sort((a, b) => {
+        return a.processNumber.localeCompare(b.processNumber);
+    });
+
+    // Mapping the processes array to HTML strings
+    const inputDetails = processes.map((process, index) => {
+        return `<p>${process.processNumber}: Burst Time=${process.burstTime}, Arrival Time=${process.arrivalTime}, Priority=${process.priority}</p>`;
+    });
+
+    // Updating the HTML content with the input details
+    document.getElementById('inputDetails').innerHTML = inputDetails.join('');
+}
+
+// Function to open the modal window and display the processes details
+function openViewWindow() {
+    displayProcesses();
+    document.getElementById('viewDetailsModal').style.display = 'block';
+}
+
+// Function to close the modal window
+function closeViewWindow() {
+    document.getElementById('viewDetailsModal').style.display = 'none';
+}
+
+// Function to schedule processes using a priority-based algorithm
+function schedule() {
+    // Initialization of variables and data structures
+    let processCount = processes.length; // Number of processes
+    let CPU = 0; // Current CPU time
+    let arrivalTime = processes.map(process => parseInt(process.arrivalTime)); // Arrival time of each process
+    let arrivalTimeTemp = [...arrivalTime]; // Temporary copy of arrival times
+    let noOfProcesses = processCount; // Number of remaining processes
+    let burstTime = processes.map(process => parseInt(process.burstTime)); // Burst time of each process
+    let remainingBurstTime = [...burstTime]; // Remaining burst time for each process
+    let priority = processes.map(process => parseInt(process.priority)); // Priority of each process
+    let priorityTemp = [...priority]; // Temporary copy of priorities
+    let waitingTime = new Array(processCount); // Waiting time for each process
+    let turnaroundTime = new Array(processCount); // Turnaround time for each process
+    let ganttChart = []; // Gantt chart to track the execution of processes
+
+    let lastArrivalTime = Math.max(...arrivalTime); // Last arrival time among all processes
+    let maxPriority = Math.max(...priority); // Maximum priority among all processes
+
+// Main scheduling loop
+while (noOfProcesses > 0 && CPU <= 1000) {
+    // Find eligible processes that have arrived and are not yet executed
+    let eligibleProcesses = [];
+    for (let i = 0; i < processCount; i++) {
+        // Check if the process has arrived and hasn't been executed yet
+        if ((arrivalTimeTemp[i] <= CPU) && (arrivalTimeTemp[i] !== (lastArrivalTime + 10))) {
+            // Check if the process priority is valid (not marked for execution)
+            if (priorityTemp[i] !== (maxPriority + 1)) {
+                // Add the eligible process to the list
+                eligibleProcesses.push({
+                    index: i,
+                    priority: priorityTemp[i]
+                });
+            }
+        }
+    }
+
+
+// Check if there are no eligible processes to execute
+if (eligibleProcesses.length === 0) {
+    // If no eligible processes, increment CPU time
+    CPU = CPU + 1;
+
+    // Continue to the next iteration to check for eligible processes
+    continue;
+}
+
+// Sort eligible processes based on priority and arrival time
+
+eligibleProcesses.sort((a, b) => {
+    // Check if priorities are different
+    if (a.priority !== b.priority) {
+        // Sort by priority in ascending order
+        return a.priority - b.priority;
+    } else {
+        // If priorities are equal, sort by arrival time in ascending order
+        return arrivalTime[a.index] - arrivalTime[b.index];
+    }
+});
+
+        // Get the index of the process with the highest priority
+        arrivalTimeIndex = eligibleProcesses[0].index;
+
+// Calculate waiting time: the time a process has to wait before starting execution
+waitingTime[arrivalTimeIndex] = Math.max(0, CPU - arrivalTime[arrivalTimeIndex]);
+
+// Calculate completion time: the time at which a process completes its execution
+let completionTime = CPU + remainingBurstTime[arrivalTimeIndex];
+
+// Calculate turnaround time: the total time a process spends in the system (waiting + execution)
+turnaroundTime[arrivalTimeIndex] = completionTime - arrivalTime[arrivalTimeIndex];
+
+// Update arrival time for the next iteration, considering a time quantum of 10 units
+arrivalTimeTemp[arrivalTimeIndex] = lastArrivalTime + 10;
+
+        // Update Gantt chart with information about the current process
+ganttChart.push({
+    process: processes[arrivalTimeIndex].processNumber, // Process identifier based on arrival time index
+    start: CPU,                        // Start time of the process in the Gantt chart
+    end: completionTime,               // End time of the process in the Gantt chart
+    burstTime: burstTime[arrivalTimeIndex]  // Burst time of the current process
+});
+
+// Update priority and process count, and move to the next process
+priorityTemp[arrivalTimeIndex] = maxPriority + 1; // Increment the priority of the current process
+noOfProcesses = noOfProcesses - 1; // Decrement the total number of processes
+CPU = completionTime; // Update the CPU time to the current completion time
+remainingBurstTime[arrivalTimeIndex] = 0; // Set the remaining burst time of the current process to zero, indicating completion
+    }
+
+// Displaying Gantt Chart
+let ganttChartOutput = "<div class='gantt-chart'>";  // Initialize the Gantt Chart HTML structure
+let minArrivalTimeIndex = arrivalTime.indexOf(Math.min(...arrivalTime));  // Find the index of the minimum arrival time
+
+// Iterate through each entry in the Gantt Chart
+for (let i = 0; i < ganttChart.length; i++) {
+    const entry = ganttChart[i];
+    const nextEntry = ganttChart[i + 1];
+
+    // If it's the first entry, add the starting process column with the initial completion time
+    if (i === 0) {
+        ganttChartOutput += `<div class='process-column'><div class='process-bar'><sub class='completion-time'>${entry.start}</sub></div></div>`;
+    }
+
+    // Create the process bar HTML with width based on burst time and add completion time
+    let processBar = "<div class='process-bar' style='width: " + entry.burstTime * 20 + "px;'>" + entry.process;
+    processBar += `<sub class='completion-time'>${entry.end}</sub>`;
+    processBar += "</div>";
+
+    // Add the process column with the created process bar
+    ganttChartOutput += "<div class='process-column'>" + processBar + "</div>";
+
+    // If there is a next entry, calculate the gap between current process and the next one
+    if (nextEntry) {
+        const gap = nextEntry.start - entry.end;
+
+        // If there is a gap, add a column with a bar representing the gap
+        if (gap > 0) {
+            ganttChartOutput += `<div class='process-column'><div class='process-bar' style='width: ${gap * 20}px;'>-</div><sub class='completion-time'>${entry.end}</sub></div>`;
+            // Add a new column for the next process with its starting completion time
+            ganttChartOutput += `<div class='process-column'><div class='process-bar'><sub class='completion-time'>${nextEntry.start}</sub></div></div>`;
+        }
+    }
+}
+
+// Close the Gantt Chart HTML structure
+ganttChartOutput += "</div>";
+
+
+// Displaying Process Details in a table
+let processDetailsOutput = "<table>\n" +  // Start of the HTML table
+    "<tr>\n" +  // Start of the table row for column headers
+    "<th>Process</th>\n" + // Header for the Process Number column
+    "<th>Burst Time</th>\n" +  // Header for the Burst Time column
+    "<th>Arrival Time</th>\n" +  // Header for the Arrival Time column
+    "<th>Priority</th>\n" +  // Header for the Priority column
+    "<th>Finishing Time</th>\n" +  // Header for the Finishing Time column
+    "<th>Turnaround Time</th>\n" +  // Header for the Turnaround Time column
+    "<th>Waiting Time</th>\n" +  // Header for the Waiting Time column
+    "</tr>\n";  // End of the table row for column headers
+
+let totalTurnaroundTime = 0;
+let totalWaitingTime = 0;
+
+for (let i = 0; i < processCount; i++) {
+    totalTurnaroundTime += turnaroundTime[i];
+    totalWaitingTime += waitingTime[i];
+
+    let completionTime = turnaroundTime[i] + arrivalTime[i];
+    
+    processDetailsOutput +=
+        `<tr>\n` +
+        `<td>${processes[i].processNumber}</td>\n` + // Display Process Number
+        `<td>${burstTime[i]}</td>\n` +
+        `<td>${arrivalTime[i]}</td>\n` +
+        `<td>${priority[i]}</td>\n` +
+        `<td>${completionTime}</td>\n` + // Display Completion Time
+        `<td>${turnaroundTime[i]}</td>\n` +
+        `<td>${waitingTime[i]}</td>\n` +
+        `</tr>\n`;
+}
+
+let avgTurnaroundTimeOutput = `<p>Avg Turnaround Time: ${totalTurnaroundTime} / ${processCount} = ${(totalTurnaroundTime / processCount).toFixed(2)}</p>`;
+let avgWaitingTimeOutput = `<p>Avg Waiting Time: ${totalWaitingTime} / ${processCount} = ${(totalWaitingTime / processCount).toFixed(2)}</p>`;
+
+processDetailsOutput += `<tr>\n` +
+    `<td>Total</td>\n` +
+    `<td></td>\n` +
+    `<td></td>\n` +
+    `<td></td>\n` +
+    `<td></td>\n` + // Placeholder for Total Completion Time
+    `<td>${totalTurnaroundTime}</td>\n` +
+    `<td>${totalWaitingTime}</td>\n` +
+    `</tr>\n`;
+
+processDetailsOutput += "</table>";
+
+
+    // Displaying the output on the page
+    document.getElementById('output').innerHTML = ganttChartOutput + processDetailsOutput + avgTurnaroundTimeOutput + avgWaitingTimeOutput;
+}
+
+</script>
+
+</body>
+</html>

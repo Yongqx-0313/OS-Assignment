@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPU Scheduling Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('OS.jpg');
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.956);
+            padding: 30px;
+            border-radius: 10px;
+            animation: slideIn 1s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #666;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #5fd4d8;
+            border: none;
+            color: #ffffff;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+        @media screen and (min-width:320px) {
+            body{
+                padding: 30px;
+            }
+            button{
+                margin-bottom: 10px;
+            }
+        }
+
+        @media screen and (min-width:768px) {
+            body{
+                padding: 20px;
+            }
+            h1{
+                font-size: 3em;
+            }
+        }
+        @media screen and (min-width:1024px) {
+            body{
+                padding: 10px;
+            }
+            button{
+                margin: 0;
+            }
+        }
+        @media screen and (min-width:1440px) {
+            body{
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CPU Scheduling Calculator</h1>
+    <p>Explore different scheduling algorithms for optimal CPU performance.</p>
+    
+    <a href="Quantum_selection.html"><button>Round Robin</button></a>
+
+    <a href="Non-Preemptive SJF.html"><button>Non-Preemtive SJF</button></a>
+
+    <a href="Preemptive Priority Scheduling.html"><button>Preemptive Priority</button></a>
+
+    <a href="Non-Preemptive Priority Scheduling.html"><button>Non-Preemtive Priotiy</button></a>
+    
+</div>
+
+</body>
+</html>
